@@ -960,7 +960,7 @@ public:
     auto nx = getSRegValue(rewriter, loc, "%cluster_nctaid.x");
     auto ny = getSRegValue(rewriter, loc, "%cluster_nctaid.y");
     auto res = add(x, mul(add(y, mul(z, ny)), nx));
-    rewriter.replaceOp(op, {res});
+    rewriter.replaceOp(op, res);
     return mlir::success();
   }
 };
@@ -1067,7 +1067,7 @@ public:
     auto offset =
         add(mul(udiv(myRow, i32_val(perPhase)), i32_val(128)), colOffset);
 
-    rewriter.replaceOp(op, {offset});
+    rewriter.replaceOp(op, offset);
     return mlir::success();
   }
 };
