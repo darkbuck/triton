@@ -129,7 +129,9 @@ class BlockedToMMA : public mlir::RewritePattern {
     int finalBitWidth = getElementTypeOrSelf(x).getIntOrFloatBitWidth();
     int origBitWidth = finalBitWidth;
     SetVector<Operation *> slice;
-    mlir::getBackwardSlice(x, &slice, bwdFilter);
+    BackwardSliceOptions sliceOptions;
+    sliceOptions.filter = bwdFilter;
+    mlir::getBackwardSlice(x, &slice, sliceOptions);
     Operation *firstOp = slice.empty() ? nullptr : *slice.begin();
     if (firstOp)
       if (Value arg = firstOp->getOperand(0))
@@ -224,9 +226,12 @@ public:
     ttg::MmaEncodingAttr mmaEnc;
     if (versionMajor == 1) {
       SetVector<Operation *> aBwdSlices, bBwdSlices;
-      auto isCvt = [](Operation *op) { return isa<ConvertLayoutOp>(op); };
-      getBackwardSlice(a, &aBwdSlices, {isCvt});
-      getBackwardSlice(b, &bBwdSlices, {isCvt});
+      BackwardSliceOptions sliceOptions;
+      sliceOptions.filter = [](Operation *op) {
+        return isa<ConvertLayoutOp>(op);
+      };
+      getBackwardSlice(a, &aBwdSlices, sliceOptions);
+      getBackwardSlice(b, &bBwdSlices, sliceOptions);
       // get the source of the first conversion found in slices
       auto getCvtArgOrder = [](Operation *op) {
         return cast<ConvertLayoutOp>(op)

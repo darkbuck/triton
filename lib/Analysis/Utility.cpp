@@ -549,6 +549,8 @@ multiRootTopologicalSort(const SetVector<Operation *> &toSort) {
   return res;
 }
 
+// TODO: Rewrite this interface with ForwardSliceOptions and
+// BackwardSliceOptions.
 SetVector<Operation *> multiRootGetSlice(Operation *op,
                                          TransitiveFilter backwardFilter,
                                          TransitiveFilter forwardFilter) {
@@ -562,12 +564,16 @@ SetVector<Operation *> multiRootGetSlice(Operation *op,
     auto *currentOp = (slice)[currentIndex];
     // Compute and insert the backwardSlice starting from currentOp.
     backwardSlice.clear();
-    getBackwardSlice(currentOp, &backwardSlice, backwardFilter);
+    BackwardSliceOptions backwardOptions;
+    backwardOptions.filter = backwardFilter;
+    getBackwardSlice(currentOp, &backwardSlice, backwardOptions);
     slice.insert(backwardSlice.begin(), backwardSlice.end());
 
     // Compute and insert the forwardSlice starting from currentOp.
     forwardSlice.clear();
-    getForwardSlice(currentOp, &forwardSlice, forwardFilter);
+    ForwardSliceOptions forwardOptions;
+    forwardOptions.filter = forwardFilter;
+    getForwardSlice(currentOp, &forwardSlice, forwardOptions);
     slice.insert(forwardSlice.begin(), forwardSlice.end());
     ++currentIndex;
   }
